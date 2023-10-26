@@ -7,13 +7,14 @@ CREATE TABLE users (
   email VARCHAR(255),
   mbti VARCHAR(4),
   interests TEXT[],
-  emails_sent_count INT DEFAULT 0,
-  frequency int
+  frequency int,
+  emails_sent_count INT DEFAULT 0
 );
 
 CREATE TABLE content (
   content_id SERIAL PRIMARY KEY,
   topic TEXT,
+  advice TEXT,
   date_sent DATE,
   user_id INT REFERENCES users(user_id)
 );
