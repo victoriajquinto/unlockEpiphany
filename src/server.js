@@ -15,6 +15,7 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
+//test server connection
 app.get('/hithere', async(req,res) => {
   try {
     res.status(200).send('hello world!');
@@ -24,9 +25,9 @@ app.get('/hithere', async(req,res) => {
   }
 });
 
+//adds a new user to the database. called by zapier webhook
 app.post('/user', async(req, res) => {
   try {
-
     let [ name, email, mbti, interests, frequency ] = [ req.body.name, req.body.email, req.body.mbti, req.body.interests, req.body.frequency ];
 
     interests = interests.split(',').map(topic => topic.trimStart());
@@ -43,23 +44,31 @@ app.post('/user', async(req, res) => {
 
     frequency = freqTransformer[frequency];
 
+    const params = [name, email, mbti, interests, frequency];
 
-    let params = [name, email, mbti, interests, frequency];
-
-    let entry = await pool.query('INSERT INTO users (name, email, mbti, interests, frequency) VALUES ($1, $2, $3, $4, $5)', params);
+    const entry = await pool.query('INSERT INTO users (name, email, mbti, interests, frequency) VALUES ($1, $2, $3, $4, $5)', params);
 
     res.status(201).send(`an new form entry from ${name} has been added to our records`);
-
   } catch (error) {
     console.log('error: ', error);
     res.status(401).send(error);
   }
 });
 
-app.get('/user', async(req, res) => {
-  try {
-    //for weekly and monthly emails - start date will be set by me
+//grabs user information for users that selected to receive emails at the same rate (e.g., daily, weekly, monthly)
+app.get('/user/:freq', async(req, res) => {
+  //for all users- send an email immediately after signup
+    //for weekly and monthly emails - start date will be set by me (e.g. every monday for weekly, every first day of month for monthly)
 
+    //idea: rotate through user's interests in lieu of random selection using (email_sent_count) % (# of interests chosen) to select topic from interests array
+  try {
+    let freq = req.params.freq;
+    let queryString = "WITH user_data_cte AS (SELECT jsonb_build_object('user_id', user_id, 'name', name, 'email', email, 'mbti', mbti, 'interests', interests, 'frequency', frequency, 'emails_sent_count', emails_sent_count) as user_data FROM users WHERE frequency = $1) SELECT user_data FROM user_data_cte";
+
+    let users = await pool.query(queryString, freq);
+    users = users.map((user) => { return user['user_data']});
+
+    res.status(200).send(users);
 
   } catch (error) {
     console.log('error: ', error);
@@ -67,6 +76,7 @@ app.get('/user', async(req, res) => {
   }
 });
 
+//stores the advice content emailed to the user
 app.post('/content', async(req, res) => {
   try {
     let [ topic, advice, user_id ] = [ req.body.topic, req.body.advice, req.body.user_id ];
@@ -75,17 +85,37 @@ app.post('/content', async(req, res) => {
 
     const params = [topic, advice, date, user_id];
 
-    const article = await pool.query('INSERT INTO content (topic, advice, date, user_id) VALUES ($1, $2, $3, $4)', params)
+    const article = await pool.query('INSERT INTO content (topic, advice, date_sent, user_id) VALUES ($1, $2, $3, $4)', params)
 
-    res.status(201).send(`An email was sent to User # ${user_id} on ${date} regarding ${topic}`)
 
+    res.status(201).send(`An email was sent to User ${user_id} on ${date} regarding ${topic}.`)
 
   } catch (error) {
     console.log('error: ', error);
     res.status(400).send(error);
   }
+});
 
+//increases email count when email is sent to user. should be called alongside POST /content
+app.patch('/increment_email', async(req, res) => {
+  try {
+    let [ user_id, currentCount ] = [req.body.user_id, req.body.emails_sent_count];
 
+    const oldCount = currentCount;
+    const newCount = currentCount + 1;
+
+    const params = [newCount, user_id];
+
+    let queryString = 'UPDATE users SET emails_sent_count = $1 WHERE user_id = $2';
+
+    let increaseCount = await pool.query(queryString, params)
+
+    res.status(200).send(`the number of emails sent to User ${user_id} has increased from ${oldCount} to ${newCount}.`)
+
+  } catch (error) {
+    console.log('error: ', error);
+    res.status(400).send(error);
+  }
 });
 
 app.listen(port, function(err) {
