@@ -11,16 +11,16 @@ const openai = new OpenAI({
 //make call to chat gpt. need name, mbti, ONE interest
 const generateAdvice = async(name, mbti, topic) => {
   const completion = await openai.chat.completions.create({
-    messages: [{ role: 'system', content: `You are an Advice Columnist who's giving advice to ${name} based on their Myers Briggs Indicator Type. This person this an ${mbti} type. Can you give them some advice regarding ${topic}? `}],
+    messages: [{ role: 'system', content: `You are an Advice Columnist who's giving advice to ${name} based on their Myers Briggs Indicator Type. This person this an ${mbti} type. Can you give them some advice regarding ${topic}? Please format the advice as a letter and sign it as Unlock Epiphany.`}],
     model: 'gpt-3.5-turbo',
   });
 
-  console.log(completion.choices[0]);
-  const advice = completion.choices[0]);
+  const advice = completion.choices[0];
+  console.log(advice);
   return advice;
 };
 
-advice('Vicky', 'INFJ', 'Networking');
+generateAdvice('Vicky', 'INFJ', 'Networking');
 
 module.exports = {
   generateAdvice
