@@ -1,23 +1,27 @@
 const axios = require('axios');
+const sendFirst = require('../scheduler.js')
 
-/* WHITEBOARD:
-FIRST send server req to GET /user/:freq at the corresponding frequency (daily, weekly, monthly)
 
-THEN make a call to chatgpt to generate content (see writeAndSend.js)
+const baseURL = 'https://d7f2-107-138-175-211.ngrok-free.app';
 
-THEN email content (see writeAndSend.js)
+const getNewUser = async () => {
+  console.log('getNewUser called');
+  const endpoint = '/newuser';
 
-THEN send server req to POST /content
-AND send server req to PATCH /increment_email
-
-*/
-
-const baseURL = 'https://9c96-107-138-175-211.ngrok-free.app';
+  return axios.get(baseURL + endpoint)
+  .then(res => {
+    console.log("getNewUser res.data: ", res.data);
+    return res.data;
+  })
+  .catch(error => {
+    console.log("Error in getUsers axios call: ", error);
+  });
+}
 
 
 //axios request to get /user/:freq. needs freq
 const getUsers = async (freq) => {
-  const endpoint = `/user`; //may not accept template literal =/
+  const endpoint = '/users';
 
   return axios.get(baseURL + endpoint, {
     params: {
@@ -25,7 +29,7 @@ const getUsers = async (freq) => {
     }
   })
   .then(res => {
-    console.log(res.data);
+
     return res.data;
   })
   .catch(error => {
@@ -36,9 +40,10 @@ const getUsers = async (freq) => {
 
 //axios request to post /content. needs topic, advice, user_id
 const postContent = async (topic, advice, user_id) => {
+  console.log('postContent called');
   const endpoint = `/content`;
 
-  return axios.post(baseURL + endpoint, {
+  axios.post(baseURL + endpoint, {
     topic,
     advice,
     user_id
@@ -53,6 +58,7 @@ const postContent = async (topic, advice, user_id) => {
 
 //axios request to patch /increment_email. needs user_id, emails_sent_count
 const patchIncrementEmail = async (user_id, emails_sent_count) => {
+  console.log('patchIncrementEmail called');
   const endpoint = `/increment_email`;
 
   return axios.patch(baseURL + endpoint, {
@@ -68,6 +74,7 @@ const patchIncrementEmail = async (user_id, emails_sent_count) => {
 };
 
 module.exports = {
+  getNewUser,
   getUsers,
   postContent,
   patchIncrementEmail
