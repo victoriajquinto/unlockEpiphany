@@ -1,23 +1,7 @@
 const axios = require('axios');
 const sendFirst = require('../scheduler.js')
 
-
 const baseURL = 'https://d7f2-107-138-175-211.ngrok-free.app';
-
-const getNewUser = async () => {
-  console.log('getNewUser called');
-  const endpoint = '/newuser';
-
-  return axios.get(baseURL + endpoint)
-  .then(res => {
-    console.log("getNewUser res.data: ", res.data);
-    return res.data;
-  })
-  .catch(error => {
-    console.log("Error in getUsers axios call: ", error);
-  });
-}
-
 
 //axios request to get /user/:freq. needs freq
 const getUsers = async (freq) => {
@@ -74,7 +58,6 @@ const patchIncrementEmail = async (user_id, emails_sent_count) => {
 };
 
 module.exports = {
-  getNewUser,
   getUsers,
   postContent,
   patchIncrementEmail
