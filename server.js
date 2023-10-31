@@ -11,6 +11,7 @@ const app = express();
 const morgan = require('morgan');
 const cors = require('cors');
 const pool = require('./db.js');
+const { sendFirst } = require('./scheduler.js')
 
 app.use(cors());
 app.use(morgan('dev'));
@@ -47,9 +48,22 @@ app.post('/user', async(req, res) => {
 
     const params = [name, email, mbti, interests, frequency];
 
-    const entry = await pool.query('INSERT INTO users (name, email, mbti, interests, frequency) VALUES ($1, $2, $3, $4, $5)', params);
+    const entry = await pool.query('INSERT INTO users (name, email, mbti, interests, frequency) VALUES ($1, $2, $3, $4, $5) RETURNING user_id', params);
 
-    res.status(201).send(`an new form entry from ${name} has been added to our records`);
+    const user_id = entry[0].user_id;
+
+    const newUser = {
+      name,
+      email,
+      mbti,
+      interests,
+      user_id,
+      emails_sent_count: 0
+    };
+
+    sendFirst(newUser);
+
+    res.status(201).send(newUser);
   } catch (error) {
     console.log('error: ', error);
     res.status(401).send(error);
@@ -57,11 +71,8 @@ app.post('/user', async(req, res) => {
 });
 
 //grabs user information for users that selected to receive emails at the same rate (e.g., daily, weekly, monthly)
-app.get('/user', async(req, res) => {
-  //for all users- send an email immediately after signup
-    //for weekly and monthly emails - start date will be set by me (e.g. every monday for weekly, every first day of month for monthly)
+app.get('/users', async(req, res) => {
 
-    //idea: rotate through user's interests in lieu of random selection using (email_sent_count) % (# of interests chosen) to select topic from interests array
   try {
     let freq = req.query.freq;
     let queryString = "WITH user_data_cte AS (SELECT jsonb_build_object('user_id', user_id, 'name', name, 'email', email, 'mbti', mbti, 'interests', interests, 'frequency', frequency, 'emails_sent_count', emails_sent_count) as user_data FROM users WHERE frequency = $1) SELECT user_data FROM user_data_cte";
@@ -87,7 +98,6 @@ app.post('/content', async(req, res) => {
     const params = [topic, advice, date, user_id];
 
     const article = await pool.query('INSERT INTO content (topic, advice, date_sent, user_id) VALUES ($1, $2, $3, $4)', params)
-
 
     res.status(201).send(`An email was sent to User ${user_id} on ${date} regarding ${topic}.`)
 
