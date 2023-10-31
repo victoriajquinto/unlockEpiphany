@@ -2,6 +2,9 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 // console.log(process.env);
 const email_password = process.env.EMAIL_PASSWORD;
+const axiosFunctions = require('../utils/axios.js');
+const postContent = axiosFunctions.postContent;
+const patchIncrementEmail = axiosFunctions.patchIncrementEmail;
 
 //for sending one email
 const transporter = nodemailer.createTransport({
@@ -14,12 +17,14 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendFirstEmail = async (userEmail, topic, advice) => {
+  console.log('sendFirstEmail called');
+  const htmlContent = `<p>${advice.replace(/\n/g, '<br>')}</p>`;
   const message = {
     from: 'unlockepiphany@icloud.com',
     to: userEmail,
     subject: `Unlock Your Epiphany in ${topic}`,
     text: advice,
-    html: `<p>${advice}<p>`
+    html: htmlContent
   }
 
   await transporter.sendMail(message, (error, info) => {
@@ -27,13 +32,8 @@ const sendFirstEmail = async (userEmail, topic, advice) => {
       console.log('Error sending email: ', error);
     } else {
       console.log('Email sent: ', info.response);
-
-      //call post /content
-      //call patch /increment_email
     }
   });
-
-
 };
 
 //for sending bulk emails:
@@ -43,13 +43,14 @@ const bulkTransporter = nodemailer.createTransport({
   auth: {
     user: 'unlockepiphany@icloud.com',
     pass: email_password
-  }
+  },
   pool: true,
   maxConnections: 5
 });
 
 
 const sendBulkEmails = async (arrayOfEpiphanies) => {
+  console.log('sendBulkEmails called');
   arrayOfEpiphanies.forEach((epiphany) => {
     const message = {
       from: 'unlockepiphany@icloud.com',
@@ -58,20 +59,19 @@ const sendBulkEmails = async (arrayOfEpiphanies) => {
       text: epiphany.advice,
     }
 
-    await bulkTransporter.sendMail(message, (error, info) => {
+    bulkTransporter.sendMail(message, (error, info) => {
       if (error) {
         console.error(`Error sending email to ${epiphany.email}:`, error);
       } else {
         console.log(`Email sent to ${epiphany.email}:`, info.response);
-
-        //call post /content
-        //call patch /increment_email
       }
     });
+    postContent(epiphany.topic, epiphany.advice, epiphany.user_id);
+    patchIncrementEmail(epiphany.user_id, epiphany.emails_sent_count);
   });
 };
 
-sendEmail('victoriajquinto@gmail.com', 'testing nodemailer 2', 'you\'re on your own, goodluck');
+// sendEmail('victoriajquinto@gmail.com', 'testing nodemailer 2', 'you\'re on your own, goodluck');
 
 /* VERIFY CONNECTION
 

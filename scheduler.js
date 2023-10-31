@@ -4,7 +4,6 @@ const axiosFunctions = require('./utils/axios.js');
 const getUsers = axiosFunctions.getUsers;
 const postContent = axiosFunctions.postContent;
 const patchIncrementEmail = axiosFunctions.patchIncrementEmail;
-const getNewUser = axiosFunctions.getNewUser;
 
 const { generateAdvice } = require('./utils/generateAdvice.js');
 const { sendFirstEmail } = require('./utils/emailer.js');
