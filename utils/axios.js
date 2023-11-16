@@ -1,7 +1,7 @@
 const axios = require('axios');
 const sendFirst = require('../scheduler.js')
 
-const baseURL = 'https://d7f2-107-138-175-211.ngrok-free.app';
+const baseURL = 'http://18.219.121.28';
 
 //axios request to get /user/:freq. needs freq
 const getUsers = async (freq) => {
