@@ -44,10 +44,10 @@ const sendBatch = async (freq) => {
       let topic = user.interests[(Math.floor(Math.random() * user.interests.length))];
 
       //call ./utils/generateAdvice.js/generateAdvice(name, mbti, topic)
-      let gptContent = await generateAdvice(user.name, user.mbti, user.topic);
+      let gptContent = await generateAdvice(user.name, user.mbti, topic);
       let advice = gptContent.message.content;
 
-      return {...user, advice};
+      return {...user, topic, advice};
     }));
     console.log('arrayOfEpiphanies', arrayOfEpiphanies);
     // call /utils/emailer.js/sendBulkEmails(arrayOfEpiphanies)
