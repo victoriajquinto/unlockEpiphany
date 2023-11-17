@@ -8,10 +8,10 @@ const patchIncrementEmail = axiosFunctions.patchIncrementEmail;
 
 //for sending one email
 const transporter = nodemailer.createTransport({
-  service: "iCloud",
+  service: "gmail",
   secure: false,
   auth: {
-    user: 'unlockepiphany@icloud.com',
+    user: 'unlockyourepiphany@gmail.com',
     pass: email_password
   }
 });
@@ -38,10 +38,10 @@ const sendFirstEmail = async (userEmail, topic, advice) => {
 
 //for sending bulk emails:
 const bulkTransporter = nodemailer.createTransport({
-  service: "iCloud",
+  service: "gmail",
   secure: false,
   auth: {
-    user: 'unlockepiphany@icloud.com',
+    user: 'unlockyourepiphany@gmail.com',
     pass: email_password
   },
   pool: true,
