@@ -1,7 +1,7 @@
 const axios = require('axios');
 const sendFirst = require('../scheduler.js')
 
-const baseURL = 'http://18.219.121.28';
+const baseURL = 'http://18.219.121.28:3000';
 
 //axios request to get /user/:freq. needs freq
 const getUsers = async (freq) => {
