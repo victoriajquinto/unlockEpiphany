@@ -20,7 +20,7 @@ const sendFirstEmail = async (userEmail, topic, advice) => {
   console.log('sendFirstEmail called');
   const htmlContent = `<p>${advice.replace(/\n/g, '<br>')}</p>`;
   const message = {
-    from: 'unlockepiphany@icloud.com',
+    from: 'unlockyourepiphany@gmail.com',
     to: userEmail,
     subject: `Unlock Your Epiphany in ${topic}`,
     text: advice,
@@ -50,10 +50,11 @@ const bulkTransporter = nodemailer.createTransport({
 
 
 const sendBulkEmails = async (arrayOfEpiphanies) => {
-  console.log('sendBulkEmails called');
+  console.log('sendBulkEmails called with epiphanies', arrayOfEpiphanies);
+
   arrayOfEpiphanies.forEach((epiphany) => {
     const message = {
-      from: 'unlockepiphany@icloud.com',
+      from: 'unlockyourepiphany@gmail.com',
       to: epiphany.email,
       subject: `Unlock Your Epiphany in ${epiphany.topic}`,
       text: epiphany.advice,
@@ -70,8 +71,6 @@ const sendBulkEmails = async (arrayOfEpiphanies) => {
     patchIncrementEmail(epiphany.user_id, epiphany.emails_sent_count);
   });
 };
-
-// sendEmail('victoriajquinto@gmail.com', 'testing nodemailer 2', 'you\'re on your own, goodluck');
 
 /* VERIFY CONNECTION
 

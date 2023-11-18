@@ -60,6 +60,7 @@ const sendBatch = async (freq) => {
 
 // sendBatch(1);
 
+
 //daily emails scheduled every day at 6 AM
 const sendDaily = schedule.scheduleJob({ hour: 6, minute: 0 }, () => {
   // Your daily task code here
