@@ -9,10 +9,21 @@ const { generateAdvice } = require('./utils/generateAdvice.js');
 const { sendFirstEmail } = require('./utils/emailer.js');
 const { sendBulkEmails } = require('./utils/emailer.js');
 
+/* WHITEBOARD:
+FIRST send server req to GET /user/:freq at the corresponding frequency (daily, weekly, monthly)
+
+THEN make a call to chatgpt to generate content
+
+THEN email content
+
+THEN send server req to POST /content
+AND send server req to PATCH /increment_email
+
+*/
+
 //first email from user signup
 const sendFirst = async (user) => {
   try {
-    console.log('sendFirst called');
     const name = user.name;
     const email = user.email;
     const mbti = user.mbti;
@@ -33,17 +44,16 @@ const sendFirst = async (user) => {
   }
 
 };
-
+//sends advice emails to users at a given frequency
 const sendBatch = async (freq) => {
   try {
     const users = await getUsers(freq);
-    // console.log('users: ', users)
     const arrayOfEpiphanies = await Promise.all(users.map(async (user) => {
 
       //randomly select topic from interests
       let topic = user.interests[(Math.floor(Math.random() * user.interests.length))];
 
-      //call ./utils/generateAdvice.js/generateAdvice(name, mbti, topic)
+      //use chatgpt to generate advice for each user based on personality type and topic
       let gptContent = await generateAdvice(user.name, user.mbti, topic);
       let advice = gptContent.message.content;
 
@@ -58,7 +68,6 @@ const sendBatch = async (freq) => {
   }
 }
 
-// sendBatch(1);
 
 
 //daily emails scheduled every day at 6 AM
@@ -69,14 +78,12 @@ const sendDaily = schedule.scheduleJob({ hour: 6, minute: 0 }, () => {
 
 //weekly emails scheduled every Monday at 6 AM
 const sendWeekly = schedule.scheduleJob('0 6 * * 1', () => {
-  // Your Monday task code here
   sendBatch(7);
 });
 
 
 //monthly emails scheduled on the first Monday of every month at 6 AM
 const sendMonthly = schedule.scheduleJob('0 6 * * 1#1', () => {
-  // Your task code here
   sendBatch(30);
 });
 
@@ -86,17 +93,7 @@ module.exports = {
 
 
 
-/* WHITEBOARD:
-FIRST send server req to GET /user/:freq at the corresponding frequency (daily, weekly, monthly)
 
-THEN make a call to chatgpt to generate content
-
-THEN email content
-
-THEN send server req to POST /content
-AND send server req to PATCH /increment_email
-
-*/
 
 
 

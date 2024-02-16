@@ -60,7 +60,7 @@ app.post('/user', async(req, res) => {
       user_id,
       emails_sent_count: 0
     };
-
+    //sends user their first email with insights from chatgpt
     sendFirst(newUser);
 
     res.status(201).send(newUser);
@@ -70,7 +70,7 @@ app.post('/user', async(req, res) => {
   }
 });
 
-//grabs user information for users that selected to receive emails at the same rate (e.g., daily, weekly, monthly)
+//grabs user information for users that selected to receive emails at a given frequency (e.g., daily, weekly, monthly)
 app.get('/users', async(req, res) => {
 
   try {
@@ -88,7 +88,7 @@ app.get('/users', async(req, res) => {
   }
 });
 
-//stores the advice content emailed to the user
+//stores into the db the chatgpt-generated advice content emailed to the user
 app.post('/content', async(req, res) => {
   try {
     let [ topic, advice, user_id ] = [ req.body.topic, req.body.advice, req.body.user_id ];
@@ -107,7 +107,7 @@ app.post('/content', async(req, res) => {
   }
 });
 
-//increases email count when email is sent to user. should be called alongside POST /content
+//increments email count when email is sent to user. should be called alongside POST /content
 app.patch('/increment_email', async(req, res) => {
   try {
     let [ user_id, currentCount ] = [req.body.user_id, req.body.emails_sent_count];
